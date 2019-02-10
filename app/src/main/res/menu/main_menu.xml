@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/manage_api_keys"
+          android:title="@string/manage_api_keys"
+          app:showAsAction="ifRoom"
+          android:icon="@drawable/outline_vpn_key_24" />
+</menu>

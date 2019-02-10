@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">SolarEdge Notifier</string>
+    <string name="update">Update</string>
+    <string name="name">Name</string>
+    <string name="energy">Energy</string>
+    <string name="output_levels">Output Levels</string>
+    <string name="output_level_descr">Notifies you of low energy output of any SolarEdge installation.</string>
+    <string name="outputbelowlevel">SolarEdge output too low!</string>
+    <string name="energyoutput">%s had an energy output of %d %s yesterday.</string>
+    <string name="outputlow_long">Your SolarEdge installation \'%s\' reached an energy output of only %d %s yesterday, which is lower than the threshold set of %d.</string>
+    <string name="output">SolarEdge output</string>
+    <string name="output_trend">Your SolarEdge installation \'%s\' reached an energy output of %d %s yesterday.</string>
+    <string name="manage_api_keys">Manage API Keys</string>
+    <string name="title_activity_manage_api_keys">ManageApiKeysActivity</string>
+    <string name="addapikey">Add API Key</string>
+    <string name="apikey">API Key</string>
+    <string name="close">Close</string>
+    <string name="add">Add</string>
+    <string name="manageapikeys">Manage API Keys</string>
+    <string name="delete">Delete</string>
+    <string name="ph_apikey">ABCDEFGHIJKLMNOPQRST</string>
+    <string name="deletekey">Delete this API key?</string>
+    <string name="ays_deleteapikey">Are you sure you want to delete this API Key?\n\n%s</string>
+</resources>
