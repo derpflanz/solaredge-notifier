@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="enabled"
+        android:title="@string/enable"/>
+
+
+    <ListPreference
+        android:defaultValue="whenbelow"
+        android:dependency="enabled"
+        android:entries="@array/not_options"
+        android:entryValues="@array/not_values"
+        android:key="options"
+        android:summary="%s"
+        android:title="@string/options"/>
+
+
+    <EditTextPreference
+        android:defaultValue="5"
+        android:key="threshold"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:dialogLayout="@layout/edittextpreference_layout"
+        android:singleLine="true"
+        android:summary="%s"
+        android:dependency="enabled"
+        android:title="@string/threshold"/>
+
+    <Preference
+        android:key="editkeys"
+        android:title="@string/manageapikeys"
+        android:summary="@string/contactsupplier">
+        <intent
+            android:targetPackage="nl.friesoft.solaredgenotifier"
+            android:targetClass="nl.friesoft.solaredgenotifier.ManageApiKeysActivity"/>
+    </Preference>
+</PreferenceScreen>

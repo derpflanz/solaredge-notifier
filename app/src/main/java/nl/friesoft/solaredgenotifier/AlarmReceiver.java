@@ -9,12 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.SystemClock;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Set;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListener {
     private static final String CHANNEL_OUTPUT_LEVELS = "OUTPUTLEVELS";
@@ -26,14 +27,25 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     private static final long INTERVAL_ERROR = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
     private static final long INTERVAL_SUCCESS = AlarmManager.INTERVAL_DAY;
 
-    public void setNextCheck(long interval) {
+    public static void __setNextCheck(Context ctx, long interval) {
         Log.i(MainActivity.TAG, "Setting alarm to check again in "+interval+" msec.");
+        setAlarm(ctx, interval);
+    }
 
-        AlarmManager aMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(context, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-                0, i, 0);
-        aMgr.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, pendingIntent);
+    public static void __disable(Context ctx) {
+        setAlarm(ctx, null);
+    }
+
+    public static void setAlarm(Context ctx, Long interval) {
+        AlarmManager alarmManager = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(ctx, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx,0, i, 0);
+
+        if (interval == null) {
+            alarmManager.cancel(pendingIntent);
+        } else {
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, pendingIntent);
+        }
     }
 
     @Override
@@ -43,16 +55,17 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         createNotificationChannels();
 
         // when we are fired, we start checking immediately
-        persistent = new Persistent(context, context.getApplicationContext().getPackageName());
-        Set<String> apikeys = persistent.getStringSet(MainActivity.PREF_API_KEY, null);
+        persistent = new Persistent(context);
+        Set<String> apikeys = persistent.getStringSet(PrefFragment.PREF_API_KEY, null);
 
-        if (apikeys == null) {
+        if (apikeys.size() == 0) {
             // TODO notify once that the notifier is not set up correctly
+            // make sure the nextcheck is set as soon as the first key is added
             Log.e(MainActivity.TAG, "No API keys set.");
         } else {
-            for(String apikey: apikeys) {
+            for (String apikey : apikeys) {
                 SolarEdge sol = new SolarEdge(this, apikey);
-                sol.initialise();
+                sol.sites();
             }
         }
     }
@@ -67,7 +80,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     }
 
     @Override
-    public void onInitialised(SolarEdge solarEdge) {
+    public void onSites(SolarEdge solarEdge) {
         Log.i(MainActivity.TAG, String.format("API key %s matches installation %s.", solarEdge.getApikey(), solarEdge.getInfo().getName()));
 
         Calendar cal = Calendar.getInstance();
@@ -81,7 +94,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         Log.e(MainActivity.TAG, "Some error occurred: "+exception.getMessage());
 
         // on error, try again in 15 minutes
-        setNextCheck(INTERVAL_ERROR);
+        setAlarm(context, INTERVAL_ERROR);
     }
 
     @Override
@@ -89,7 +102,21 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         Log.i(MainActivity.TAG, String.format("%s had %d %s", solarEdge.getInfo().getName(), result.getTotalEnergy(), result.getEnergyUnit()));
 
         // by default, we only notify when no output is generated
-        long min_energy = persistent.getLong(MainActivity.PREF_MIN_ENERGY, 0L);
+        long min_energy = 0;
+        String option = persistent.getString(PrefFragment.PREF_OPTIONS, PrefFragment.OPT_WHENBELOW);
+        if (PrefFragment.OPT_WHENBELOW.equals(option)) {
+            String threshold = persistent.getString(PrefFragment.PREF_THRESHOLD, "");
+
+            try {
+                min_energy = Long.parseLong(threshold);
+            } catch (NumberFormatException nfe) {
+                min_energy = PrefFragment.OPT_MIN_ENERGY;
+            }
+        } else {
+            // option set to daily, so the min_energy level is MAX
+            min_energy = PrefFragment.OPT_MIN_ENERGY;
+        }
+
         if (result.getTotalEnergy() < min_energy) {
             String message, longmessage, title;
             int icon;
@@ -129,7 +156,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         }
 
         // success, check again tomorrow
-        setNextCheck(INTERVAL_SUCCESS);
+        setAlarm(context, INTERVAL_SUCCESS);
     }
 
     private void createNotificationChannels() {

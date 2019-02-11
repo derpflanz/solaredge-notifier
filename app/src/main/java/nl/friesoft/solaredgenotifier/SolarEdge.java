@@ -54,7 +54,7 @@ public class SolarEdge implements RESTTask.RESTListener {
         restTask.execute(task, path);
     }
 
-    public void initialise() {
+    public void sites() {
         runTask(TASK_SITES, PATH_SITES, null);
     }
 
@@ -140,7 +140,7 @@ public class SolarEdge implements RESTTask.RESTListener {
 
             setInfo(result);
 
-            listener.onInitialised(this);
+            listener.onSites(this);
         }
 
         return exception;

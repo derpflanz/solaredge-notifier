@@ -21,4 +21,16 @@
     <string name="ph_apikey">ABCDEFGHIJKLMNOPQRST</string>
     <string name="deletekey">Delete this API key?</string>
     <string name="ays_deleteapikey">Are you sure you want to delete this API Key?\n\n%s</string>
+    <string name="notifier">Notifier</string>
+    <string name="disclaimer">Disclaimer: the creator of this app is not affiliated in any way by SolarEdge.</string>
+    <string name="enable">Notifier Enabled</string>
+    <string name="contactsupplier">Contact your SolarEdge supplier for the keys.</string>
+    <string name="preftype">When to notify</string>
+
+    <string name="whenbelow">When below a certain value</string>
+    <string name="daily">Daily</string>
+    <string name="options">When to notify</string>
+    <string name="threshold">Threshold (Wh)</string>
+    <string name="apikeyinfo">Manage your API keys here. API keys can be obtained from the company that installed your PV system. Only one installation per API key is supported at this moment.</string>
+
 </resources>

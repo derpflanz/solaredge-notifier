@@ -1,8 +1,8 @@
 package nl.friesoft.solaredgenotifier;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,9 +14,9 @@ public class Persistent {
     Context ctx;
     SharedPreferences prefs;
 
-    public Persistent(Context _ctx, String name) {
+    public Persistent(Context _ctx) {
         ctx = _ctx;
-        prefs = ctx.getSharedPreferences(name, Activity.MODE_PRIVATE);
+        prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
     }
 
     public void remove(String key) {
@@ -30,6 +30,8 @@ public class Persistent {
         e.putLong(key, value);
         e.commit();
     }
+
+    public boolean getBoolean(String key, boolean def) { return prefs.getBoolean(key, def); }
 
     public long getLong(String key, long def) {
         return prefs.getLong(key, def);

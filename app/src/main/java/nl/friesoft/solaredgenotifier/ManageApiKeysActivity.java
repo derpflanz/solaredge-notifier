@@ -1,15 +1,17 @@
 package nl.friesoft.solaredgenotifier;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.HashSet;
 import java.util.Set;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 public class ManageApiKeysActivity extends AppCompatActivity implements
         ApiKeyDialog.ApiKeyDialogListener, ApiKeyAdapter.ApiKeyAdapterListener {
@@ -36,16 +38,14 @@ public class ManageApiKeysActivity extends AppCompatActivity implements
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        persistent = new Persistent(this, getApplicationContext().getPackageName());
+        persistent = new Persistent(this);
 
-        apikeys = persistent.getStringSet(MainActivity.PREF_API_KEY, new HashSet<String>());
+        apikeys = persistent.getStringSet(PrefFragment.PREF_API_KEY, new HashSet<String>());
         apiKeyAdapter = new ApiKeyAdapter(this, apikeys);
 
         lvApiKeys = findViewById(R.id.lvApiKeys);
         lvApiKeys.setAdapter(apiKeyAdapter);
-
     }
-
 
     private void showApiKeyDialog() {
         ApiKeyDialog dialog = new ApiKeyDialog();
@@ -54,7 +54,7 @@ public class ManageApiKeysActivity extends AppCompatActivity implements
 
     @Override
     public void onApiKeyAdded(String apikey) {
-        persistent.putStringToSet(MainActivity.PREF_API_KEY, apikey);
+        persistent.putStringToSet(PrefFragment.PREF_API_KEY, apikey);
         apikeys.add(apikey);
         apiKeyAdapter.notifyDataSetChanged();
 
@@ -63,7 +63,7 @@ public class ManageApiKeysActivity extends AppCompatActivity implements
 
     @Override
     public void onApiKeyDeleted(String apikey) {
-        persistent.removeFromSet(MainActivity.PREF_API_KEY, apikey);
+        persistent.removeFromSet(PrefFragment.PREF_API_KEY, apikey);
         apikeys.remove(apikey);
         apiKeyAdapter.notifyDataSetChanged();
 

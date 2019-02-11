@@ -19,4 +19,15 @@ class SolarEdgeEnergy {
     public int getTotalEnergy() {
         return totalEnergy;
     }
+
+    public String getFormattedEnergy() {
+        String r;
+        if ("Wh".equals(energyUnit) && totalEnergy > 1000) {
+            r = String.format("%d kWh", totalEnergy / 1000);
+        } else {
+            r = String.format("%d %s", totalEnergy, energyUnit);
+        }
+
+        return r;
+    }
 }
