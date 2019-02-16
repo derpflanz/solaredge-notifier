@@ -5,8 +5,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
@@ -21,31 +23,47 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     private static final String CHANNEL_OUTPUT_LEVELS = "OUTPUTLEVELS";
     public static final String EXTRA_API_KEY = "EXTRA_API_KEY";
     public static final String EXTRA_INSTALLATION_ID = "EXTRA_INSTALLATION_ID";
+    public static final String EXTRA_REASON = "EXTRA_REASON";
+    private static final int REQ_APIKEYS = 1;
+    private static final String CHANNEL_WARNINGS = "WARNINGS";
     Persistent persistent;
     Context context;
+
+    public static int REASON_ALLOK = 0;
+    public static int REASON_ERROR = 1;
 
     private static final long INTERVAL_ERROR = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
     private static final long INTERVAL_SUCCESS = AlarmManager.INTERVAL_DAY;
 
-    public static void __setNextCheck(Context ctx, long interval) {
-        Log.i(MainActivity.TAG, "Setting alarm to check again in "+interval+" msec.");
-        setAlarm(ctx, interval);
-    }
-
-    public static void __disable(Context ctx) {
-        setAlarm(ctx, null);
-    }
-
+    // set interval to null to cancel the alarm
     public static void setAlarm(Context ctx, Long interval) {
         AlarmManager alarmManager = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(ctx, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx,0, i, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx,0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (interval == null) {
+            Log.d(MainActivity.TAG, "Alarm canceled");
             alarmManager.cancel(pendingIntent);
         } else {
+            Log.d(MainActivity.TAG, "Alarm set in "+interval+" msecs");
             alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, pendingIntent);
         }
+    }
+
+    public static boolean isRunning(Context ctx) {
+        Intent i = new Intent(ctx, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx,0, i, PendingIntent.FLAG_NO_CREATE);
+
+        return pendingIntent != null;
+    }
+
+    public static void enableBoot(Context context, boolean b) {
+        ComponentName receiver = new ComponentName(context, BootReceiver.class);
+        PackageManager pm = context.getPackageManager();
+
+        pm.setComponentEnabledSetting(receiver,
+                b?PackageManager.COMPONENT_ENABLED_STATE_ENABLED:PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
     @Override
@@ -59,24 +77,39 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         Set<String> apikeys = persistent.getStringSet(PrefFragment.PREF_API_KEY, null);
 
         if (apikeys.size() == 0) {
-            // TODO notify once that the notifier is not set up correctly
-            // make sure the nextcheck is set as soon as the first key is added
-            Log.e(MainActivity.TAG, "No API keys set.");
+            // If not API keys are set when the alarm goes, we log this,
+            // but don't do anything else.
+            // The MainActivity should give enough info on how the whole thing
+            // works.
+            Log.e(MainActivity.TAG, "No API keys set!");
+
+            Check c = new Check(Check.Type.NOKEY);
+            persistent.putString(PrefFragment.PREF_LASTCHECK, c.toString());
         } else {
-            for (String apikey : apikeys) {
-                SolarEdge sol = new SolarEdge(this, apikey);
-                sol.sites();
+            // switch true to false to enable the checker
+            if (false) {
+                setAlarm(context, 5000l);
+            } else {
+                for (String apikey : apikeys) {
+                    SolarEdge sol = new SolarEdge(this, apikey);
+                    sol.sites();
+                }
             }
         }
     }
 
-    private PendingIntent getPendingIntent(String apikey, int installationId) {
+    private PendingIntent getPendingIntent(SolarEdge solarEdge, int reason) {
+        String apikey = solarEdge.getApikey();
+        int installationId = solarEdge.getInfo().getId();
+
         Intent intent = new Intent(context, InstallationActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(EXTRA_API_KEY, apikey);
         intent.putExtra(EXTRA_INSTALLATION_ID, installationId);
+        intent.putExtra(EXTRA_REASON, reason);
 
-        return PendingIntent.getActivity(context, 0, intent, 0);
+        Log.d(MainActivity.TAG, "Created intent with "+apikey+" and "+installationId);
+        return PendingIntent.getActivity(context, installationId, intent, 0);
     }
 
     @Override
@@ -87,6 +120,9 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         cal.add(Calendar.DATE, -1);
 
         solarEdge.energy(solarEdge.getInfo().getId(), cal.getTime(), cal.getTime());
+
+        Check c = new Check(Check.Type.SUCCESS);
+        persistent.putString(PrefFragment.PREF_LASTCHECK, c.toString());
     }
 
     @Override
@@ -95,14 +131,18 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
 
         // on error, try again in 15 minutes
         setAlarm(context, INTERVAL_ERROR);
+
+        Check c = new Check(Check.Type.FAIL);
+        persistent.putString(PrefFragment.PREF_LASTCHECK, c.toString());
     }
 
     @Override
     public void onEnergy(SolarEdge solarEdge, SolarEdgeEnergy result) {
-        Log.i(MainActivity.TAG, String.format("%s had %d %s", solarEdge.getInfo().getName(), result.getTotalEnergy(), result.getEnergyUnit()));
+        Log.i(MainActivity.TAG, String.format("%s had %d Wh", solarEdge.getInfo().getName(), result.getTotalEnergy()));
 
         // by default, we only notify when no output is generated
         long min_energy = 0;
+        int reason = REASON_ALLOK;
         String option = persistent.getString(PrefFragment.PREF_OPTIONS, PrefFragment.OPT_WHENBELOW);
         if (PrefFragment.OPT_WHENBELOW.equals(option)) {
             String threshold = persistent.getString(PrefFragment.PREF_THRESHOLD, "");
@@ -125,17 +165,18 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
                 // when set to MAX_VALUE, we use a slightly nicer message
                 title = context.getString(R.string.output);
                 message = String.format(context.getString(R.string.energyoutput),
-                        solarEdge.getInfo().getName(), result.getTotalEnergy(), result.getEnergyUnit());
+                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()));
                 longmessage = String.format(context.getString(R.string.output_trend),
-                        solarEdge.getInfo().getName(), result.getTotalEnergy(), result.getEnergyUnit());
+                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()));
                 icon = R.drawable.outline_wb_sunny_24;
             } else {
                 title = context.getString(R.string.outputbelowlevel);
                 message = String.format(context.getString(R.string.energyoutput),
-                        solarEdge.getInfo().getName(), result.getTotalEnergy(), result.getEnergyUnit());
+                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()));
                 longmessage = String.format(context.getString(R.string.outputlow_long),
-                        solarEdge.getInfo().getName(), result.getTotalEnergy(), result.getEnergyUnit(), min_energy);
+                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()), min_energy);
                 icon = R.drawable.outline_wb_cloudy_24;
+                reason = REASON_ERROR;
             }
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, CHANNEL_OUTPUT_LEVELS)
@@ -144,7 +185,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
                     .setContentText(message)
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(longmessage))
-                    .setContentIntent(getPendingIntent(solarEdge.getApikey(), solarEdge.getInfo().getId()))
+                    .setContentIntent(getPendingIntent(solarEdge, reason))
                     .setAutoCancel(true)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 

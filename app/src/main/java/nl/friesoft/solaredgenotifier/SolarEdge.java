@@ -109,12 +109,11 @@ public class SolarEdge implements RESTTask.RESTListener {
         int totalEnergy = 0;
         for (int i = 0; i < values.length(); i++) {
             JSONObject value = values.getJSONObject(i);
-            if (!value.isNull("value")) {
-                totalEnergy += value.getInt("value");
+            if (!value.isNull("value") && !value.isNull("date")) {
+                result.addEnergy(value.getString("date"), value.getInt("value"));
             }
         }
 
-        result.setTotalEnergy(totalEnergy);
         listener.onEnergy(this, result);
 
         return null;

@@ -36,4 +36,10 @@
             android:targetPackage="nl.friesoft.solaredgenotifier"
             android:targetClass="nl.friesoft.solaredgenotifier.ManageApiKeysActivity"/>
     </Preference>
+
+    <Preference
+        android:key="lastcheck"
+        android:title="@string/lastcheck"
+        android:summary="@string/ph_lastcheck"
+        />
 </PreferenceScreen>

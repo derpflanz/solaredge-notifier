@@ -3,6 +3,10 @@ package nl.friesoft.solaredgenotifier;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.text.DateFormat;
+import java.util.Locale;
+import java.util.Set;
+
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -14,6 +18,8 @@ public class PrefFragment extends PreferenceFragment {
     public static final String PREF_THRESHOLD = "threshold";
     public static final String PREF_OPTIONS = "options";
     public static final String PREF_API_KEY = "pref_api_key";
+    public static final String PREF_LASTCHECK = "lastcheck";
+    private static final CharSequence PREF_EDITKEYS = "editkeys";
 
     public static final String OPT_WHENBELOW = "whenbelow";
     public static final long OPT_MIN_ENERGY = Long.MAX_VALUE;
@@ -26,6 +32,26 @@ public class PrefFragment extends PreferenceFragment {
         final EditTextPreference threshold = (EditTextPreference) findPreference(PREF_THRESHOLD);
         ListPreference options = (ListPreference) findPreference(PREF_OPTIONS);
         SwitchPreference enable = (SwitchPreference) findPreference(PREF_ENABLE);
+        Preference editkeys = (Preference) findPreference(PREF_EDITKEYS);
+        Preference lastcheck = findPreference(PREF_LASTCHECK);
+
+        Persistent p = new Persistent(getActivity());
+        Set<String> keys = p.getStringSet(PREF_API_KEY, null);
+        if (keys == null || keys.size() == 0) {
+            editkeys.setIcon(R.drawable.baseline_warning_24);
+            editkeys.setSummary(R.string.contactsupplier);
+        } else {
+            editkeys.setSummary(String.format(getString(R.string.configured_n_keys), keys.size()));
+        }
+        lastcheck.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                updateLastCheck(preference);
+
+                return true;
+            }
+        });
+        updateLastCheck(lastcheck);
 
         if (OPT_WHENBELOW.equals(options.getValue())) {
             threshold.setEnabled(true);
@@ -59,14 +85,34 @@ public class PrefFragment extends PreferenceFragment {
                     // disable all alarms
                     Log.i(MainActivity.TAG, "Stopping alarms.");
                     AlarmReceiver.setAlarm(getActivity(), null);
+                    AlarmReceiver.enableBoot(getContext(), false);
                 } else {
                     // re-enable the alarms
                     Log.i(MainActivity.TAG, "Enabling alarms.");
                     AlarmReceiver.setAlarm(getActivity(), 0l);
+                    AlarmReceiver.enableBoot(getContext(), true);
                 }
 
                 return true;
             }
         });
+    }
+
+    private void updateLastCheck(Preference lastcheck) {
+        Persistent p = new Persistent(getActivity());
+
+        String s_lastcheck = p.getString(PREF_LASTCHECK, "");
+        if (!"".equals(s_lastcheck)) {
+            Check c = Check.fromString(s_lastcheck);
+            DateFormat f = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
+
+            if (c.getType() == Check.Type.SUCCESS) {
+                lastcheck.setSummary(String.format(getString(R.string.success_at_s), f.format(c.getDate())));
+            } else {
+                lastcheck.setSummary(String.format(getString(R.string.fail_at_s_s), f.format(c.getDate()), c.getType().toString()));
+            }
+        } else {
+            lastcheck.setSummary(R.string.never);
+        }
     }
 }
