@@ -24,7 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
         (for release)
         [done] TODO Implement the InstallationActivity
         [dropped] TODO Implement the no API keys notification
-        TODO Start alarmmanager on boot
+        [done] TODO Start alarmmanager on boot
         [done] TODO (bug) The PendingIntent in the Notification always gives one API/InstallId
 
         Basic functionality:

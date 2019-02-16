@@ -1,5 +1,6 @@
 package nl.friesoft.solaredgenotifier;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -41,7 +42,9 @@ public class PrefFragment extends PreferenceFragment {
             editkeys.setIcon(R.drawable.baseline_warning_24);
             editkeys.setSummary(R.string.contactsupplier);
         } else {
-            editkeys.setSummary(String.format(getString(R.string.configured_n_keys), keys.size()));
+            Resources r = getResources();
+            String k = r.getQuantityString(R.plurals.configured_n_keys, keys.size());
+            editkeys.setSummary(String.format(k, keys.size()));
         }
         lastcheck.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override

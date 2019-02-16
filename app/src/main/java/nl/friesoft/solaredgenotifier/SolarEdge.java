@@ -1,7 +1,5 @@
 package nl.friesoft.solaredgenotifier;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -127,19 +125,18 @@ public class SolarEdge implements RESTTask.RESTListener {
         if (count == 0) {
             exception = new SolarEdgeException("No sites found for API key "+apikey);
         } else {
-            if (count > 1) {
-                Log.w(MainActivity.TAG, "More than one site found, only using the first one.");
-            }
             JSONArray sites = sites_meta.getJSONArray("site");
-            JSONObject theSite = sites.getJSONObject(0);
+            for (int i = 0; i < sites.length(); i++) {
+                JSONObject theSite = sites.getJSONObject(i);
 
-            result = new SolarEdgeInfo();
-            result.setName(theSite.getString("name"));
-            result.setId(theSite.getInt("id"));
+                result = new SolarEdgeInfo();
+                result.setName(theSite.getString("name"));
+                result.setId(theSite.getInt("id"));
 
-            setInfo(result);
+                setInfo(result);
 
-            listener.onSites(this);
+                listener.onSites(this);
+            }
         }
 
         return exception;

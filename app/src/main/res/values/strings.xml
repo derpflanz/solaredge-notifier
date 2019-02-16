@@ -30,7 +30,7 @@
     <string name="daily">Daily</string>
     <string name="options">When to notify</string>
     <string name="threshold">Threshold (Wh)</string>
-    <string name="apikeyinfo">Manage your API keys here. API keys can be obtained from the company that installed your PV system. Only one installation per API key is supported at this moment.</string>
+    <string name="apikeyinfo">Manage your API keys here. API keys can be obtained from the company that installed your PV system.</string>
     <string name="installname">Installation name</string>
     <string name="ph_installname">Some Example Solar</string>
     <string name="energyyesterday">Energy yesterday</string>
@@ -38,7 +38,10 @@
     <string name="avgenergylastweek">Average daily output last seven days</string>
     <string name="ph_apikey_id">API 7W2265S86DQXAJKDBJYTEDYZLRSA817F / ID 18800</string>
     <string name="noapikeys">No API keys set</string>
-    <string name="configured_n_keys">Configured %d keys.</string>
+    <plurals name="configured_n_keys">
+        <item quantity="one">Configured %d key.</item>
+        <item quantity="other">Configured %d keys.</item>
+    </plurals>
     <string name="lastcheck">Last check (tap to refresh)</string>
     <string name="ph_lastcheck">Success on Monday, June 15, 2009 1:45:30 PM</string>
     <string name="never">Never</string>
