@@ -23,6 +23,7 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_manage_api_keys);
         setTitle(R.string.manageapikeys);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -61,6 +62,7 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
 
         siteStorage.delete(apikey);
 
+        setProgressBarIndeterminateVisibility(true);
         SolarEdge solarEdge = new SolarEdge(this, apikey);
         solarEdge.sites();
     }
@@ -79,6 +81,8 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
         Site s = new Site(solarEdge.getApikey(), solarEdge.getInfo().getId());
         s.setName(solarEdge.getInfo().getName());
         siteStorage.add(s);
+
+        setProgressBarIndeterminateVisibility(false);
     }
 
     @Override

@@ -19,12 +19,12 @@ public class SolarEdge implements RESTTask.RESTListener {
     private final static String API_BASE = "https://monitoringapi.solaredge.com/";
 
     private final static String TASK_SITES = "sites";
-    private final static String TASK_SITE = "info";
+    private final static String TASK_INFO = "info";
     private final static String TASK_ENERGY = "energy";
 
-    private final static String PATH_SITE = "info/%d/details";
+    private final static String PATH_INFO = "site/%d/details";
     private final static String PATH_SITES = "sites/list";
-    private final static String PATH_ENERGY = "info/%d/energy";
+    private final static String PATH_ENERGY = "site/%d/energy";
 
     private String apikey = "";
     private ISolarEdgeListener listener;
@@ -59,7 +59,7 @@ public class SolarEdge implements RESTTask.RESTListener {
     }
 
     public void info(int siteId) {
-        runTask(TASK_SITE, String.format(PATH_SITE, siteId), null);
+        runTask(TASK_INFO, String.format(PATH_INFO, siteId), null);
     }
 
     public void energy(int siteId, Date startDate, Date endDate) {
@@ -91,7 +91,7 @@ public class SolarEdge implements RESTTask.RESTListener {
                 exception = processSites(r);
             } else if (TASK_ENERGY.equals(task)) {
                 exception = processEnergy(r);
-            } else if (TASK_SITE.equals(task)) {
+            } else if (TASK_INFO.equals(task)) {
                 exception = processSite(r);
             }
         } catch (JSONException e) {
@@ -102,8 +102,6 @@ public class SolarEdge implements RESTTask.RESTListener {
             listener.onError(this, exception);
         }
     }
-
-
 
     private SolarEdgeException processEnergy(JSONObject r) throws JSONException {
         SolarEdgeEnergy result;
@@ -147,7 +145,7 @@ public class SolarEdge implements RESTTask.RESTListener {
         if (count == 0) {
             exception = new SolarEdgeException("No sites found for API key "+apikey);
         } else {
-            JSONArray sites = sites_meta.getJSONArray("info");
+            JSONArray sites = sites_meta.getJSONArray("site");
             for (int i = 0; i < sites.length(); i++) {
                 JSONObject theSite = sites.getJSONObject(i);
 

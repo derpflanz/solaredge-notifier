@@ -39,12 +39,15 @@ public class PrefFragment extends PreferenceFragment {
         Preference sites = findPreference(PREF_SITES);
 
         SiteStorage siteStorage = new SiteStorage(getContext());
+        Resources r = getResources();
 
         if (siteStorage.count() == 0) {
             sites.setIcon(R.drawable.baseline_warning_24);
             sites.setSummary(getString(R.string.nositesfound));
         } else {
-            sites.setSummary(String.format(getString(R.string.d_sites), siteStorage.count()));
+            long c = siteStorage.count();
+            String k = r.getQuantityString(R.plurals.found_n_sites, (int)c);
+            sites.setSummary(String.format(k, c));
         }
 
         Persistent p = new Persistent(getActivity());
@@ -53,7 +56,6 @@ public class PrefFragment extends PreferenceFragment {
             editkeys.setIcon(R.drawable.baseline_warning_24);
             editkeys.setSummary(R.string.contactsupplier);
         } else {
-            Resources r = getResources();
             String k = r.getQuantityString(R.plurals.configured_n_keys, keys.size());
             editkeys.setSummary(String.format(k, keys.size()));
         }

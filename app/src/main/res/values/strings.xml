@@ -42,6 +42,10 @@
         <item quantity="one">Configured %d key.</item>
         <item quantity="other">Configured %d keys.</item>
     </plurals>
+    <plurals name="found_n_sites">
+        <item quantity="one">Found %d site.</item>
+        <item quantity="other">Found %d sites.</item>
+    </plurals>
     <string name="lastcheck">Last check (tap to refresh)</string>
     <string name="ph_lastcheck">Success on Monday, June 15, 2009 1:45:30 PM</string>
     <string name="never">Never</string>

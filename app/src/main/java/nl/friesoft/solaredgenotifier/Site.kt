@@ -1,5 +1,9 @@
 package nl.friesoft.solaredgenotifier
 
-class Site(apikey: String, id: Int) {
+data class Site(val apikey: String, val id: Int) {
+    companion object {
+        val INVALID = Site("", 0)
+    }
+
     lateinit var name: String
 }
