@@ -1,7 +1,6 @@
 package nl.friesoft.solaredgenotifier;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
@@ -13,8 +12,7 @@ import java.util.Set;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class ManageApiKeysActivity extends AppCompatActivity implements
-        ApiKeyDialog.ApiKeyDialogListener, ApiKeyAdapter.ApiKeyAdapterListener {
+public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCallbacks {
 
     private ListView lvApiKeys;
     private Persistent persistent;
@@ -57,8 +55,6 @@ public class ManageApiKeysActivity extends AppCompatActivity implements
         persistent.putStringToSet(PrefFragment.PREF_API_KEY, apikey);
         apikeys.add(apikey);
         apiKeyAdapter.notifyDataSetChanged();
-
-        Log.d(MainActivity.TAG, "add apikey: "+apikey);
     }
 
     @Override
@@ -66,7 +62,5 @@ public class ManageApiKeysActivity extends AppCompatActivity implements
         persistent.removeFromSet(PrefFragment.PREF_API_KEY, apikey);
         apikeys.remove(apikey);
         apiKeyAdapter.notifyDataSetChanged();
-
-        Log.d(MainActivity.TAG, "delete apikey: "+apikey);
     }
 }

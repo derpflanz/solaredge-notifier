@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 public class ApiKeyDialog extends DialogFragment {
     public static final String TAG = "dialogapikey";
-    private ApiKeyDialogListener listener;
+    private ApiKeyCallbacks listener;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -40,10 +40,6 @@ public class ApiKeyDialog extends DialogFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        listener = (ApiKeyDialogListener)context;
-    }
-
-    public interface  ApiKeyDialogListener {
-        void onApiKeyAdded(String apikey);
+        listener = (ApiKeyCallbacks)context;
     }
 }

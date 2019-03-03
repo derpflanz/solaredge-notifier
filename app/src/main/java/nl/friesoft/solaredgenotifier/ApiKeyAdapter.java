@@ -14,14 +14,14 @@ import java.util.Set;
 
 class ApiKeyAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
-    private final ApiKeyAdapterListener listener;
+    private final ApiKeyCallbacks listener;
     private Set<String> apikeys;
     private Activity activity;
 
     public ApiKeyAdapter(Activity _activity, Set<String> _apikeys) {
         mInflater = LayoutInflater.from(_activity);
 
-        listener = (ApiKeyAdapterListener)_activity;
+        listener = (ApiKeyCallbacks)_activity;
         activity = _activity;
         apikeys = _apikeys;
     }
@@ -70,9 +70,5 @@ class ApiKeyAdapter extends BaseAdapter {
         });
 
         return view;
-    }
-
-    public interface ApiKeyAdapterListener {
-        void onApiKeyDeleted(String apikey);
     }
 }
