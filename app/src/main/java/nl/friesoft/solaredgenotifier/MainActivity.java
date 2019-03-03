@@ -46,7 +46,6 @@ import androidx.appcompat.app.AppCompatActivity;
         o API keys for testing are 7W2265S86DQXAJKDBJYTEDYZLRSA817F and
           PIEC7WMKQU7WLAU4BZT7F6BPMKXBKNWJ, you can use SMS to send them
           to the emulator
-
      */
 
 public class MainActivity extends AppCompatActivity {

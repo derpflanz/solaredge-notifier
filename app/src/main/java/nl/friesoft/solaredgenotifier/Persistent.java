@@ -48,7 +48,11 @@ public class Persistent {
     }
 
     public Set<String> getStringSet(String key, Set<String> def) {
-        return prefs.getStringSet(key, def);
+        Set<String> ret = prefs.getStringSet(key, def);
+        if (ret == null) {
+            ret = new HashSet<>();
+        }
+        return ret;
     }
 
     private Set<String> getCopyOfSet(String key) {
