@@ -54,14 +54,14 @@ public class InstallationActivity extends AppCompatActivity implements ISolarEdg
             aweekago.add(Calendar.DATE, -7);
 
             SolarEdge edge = new SolarEdge(this, apikey);
-            edge.sites();
+            edge.info(installId);
             edge.energy(installId, aweekago.getTime(), yesterday.getTime());
         }
     }
 
     @Override
-    public void onSites(SolarEdge solarEdge) {
-        tvInstallName.setText(solarEdge.getInfo().getName());
+    public void onSiteFound(SolarEdge solarEdge) {
+        // never called, we don't call sites()
     }
 
     @Override
@@ -71,7 +71,14 @@ public class InstallationActivity extends AppCompatActivity implements ISolarEdg
 
     @Override
     public void onEnergy(SolarEdge solarEdge, SolarEdgeEnergy result) {
-        tvEnergyYesterday.setText(SolarEdgeEnergy.format(result.getLastEnergy()));
-        tvAvgLastWeek.setText(SolarEdgeEnergy.format(result.getAverageEnergy()));
+        if (solarEdge.getInfo().getId() == installId) {
+            tvEnergyYesterday.setText(SolarEdgeEnergy.format(result.getLastEnergy()));
+            tvAvgLastWeek.setText(SolarEdgeEnergy.format(result.getAverageEnergy()));
+        }
+    }
+
+    @Override
+    public void onInfo(SolarEdge solarEdge) {
+        tvInstallName.setText(solarEdge.getInfo().getName());
     }
 }

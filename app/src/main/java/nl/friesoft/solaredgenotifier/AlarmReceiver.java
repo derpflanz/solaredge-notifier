@@ -91,6 +91,8 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
                 setAlarm(context, 5000l);
             } else {
                 for (String apikey : apikeys) {
+                    // We call sites(), because we want all sites connected to the
+                    // API keys. onSiteFound() will be possibly called more than once
                     SolarEdge sol = new SolarEdge(this, apikey);
                     sol.sites();
                 }
@@ -113,7 +115,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     }
 
     @Override
-    public void onSites(SolarEdge solarEdge) {
+    public void onSiteFound(SolarEdge solarEdge) {
         Log.i(MainActivity.TAG, String.format("API key %s matches installation %s.", solarEdge.getApikey(), solarEdge.getInfo().getName()));
 
         Calendar cal = Calendar.getInstance();
@@ -198,6 +200,11 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
 
         // success, check again tomorrow
         setAlarm(context, INTERVAL_SUCCESS);
+    }
+
+    @Override
+    public void onInfo(SolarEdge solarEdge) {
+        // never entered, we don't call 'info()'
     }
 
     private void createNotificationChannels() {

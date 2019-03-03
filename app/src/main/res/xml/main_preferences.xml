@@ -38,6 +38,15 @@
     </Preference>
 
     <Preference
+        android:key="sites"
+        android:title="@string/sites"
+        android:summary="@string/nosites">
+        <intent
+            android:targetPackage="nl.friesoft.solaredgenotifier"
+            android:targetClass="nl.friesoft.solaredgenotifier.SitesActivity"/>
+    </Preference>
+
+    <Preference
         android:key="lastcheck"
         android:title="@string/lastcheck"
         android:summary="@string/ph_lastcheck"

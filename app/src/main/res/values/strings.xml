@@ -23,7 +23,7 @@
     <string name="notifier">Notifier</string>
     <string name="disclaimer">Disclaimer: the creator of this app is not affiliated in any way by SolarEdge.</string>
     <string name="enable">Notifier enabled</string>
-    <string name="contactsupplier">Na API keys set! The notifier will not work correctly.</string>
+    <string name="contactsupplier">No API keys set! The notifier will not work correctly.</string>
     <string name="preftype">When to notify</string>
 
     <string name="whenbelow">When below a certain value</string>
@@ -47,5 +47,9 @@
     <string name="never">Never</string>
     <string name="success_at_s">Success at %s</string>
     <string name="fail_at_s_s">Fail at %s (%s)</string>
+    <string name="sites">Sites</string>
+    <string name="nosites">No sites found. Add an API key or refresh the existing ones.</string>
+    <string name="d_sites">%d sites.</string>
+    <string name="nositesfound">No sites found. Add a valid API key to install sites.</string>
 
 </resources>

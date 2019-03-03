@@ -19,10 +19,12 @@ public class SolarEdge implements RESTTask.RESTListener {
     private final static String API_BASE = "https://monitoringapi.solaredge.com/";
 
     private final static String TASK_SITES = "sites";
+    private final static String TASK_SITE = "info";
     private final static String TASK_ENERGY = "energy";
 
+    private final static String PATH_SITE = "info/%d/details";
     private final static String PATH_SITES = "sites/list";
-    private final static String PATH_ENERGY = "site/%d/energy";
+    private final static String PATH_ENERGY = "info/%d/energy";
 
     private String apikey = "";
     private ISolarEdgeListener listener;
@@ -56,6 +58,10 @@ public class SolarEdge implements RESTTask.RESTListener {
         runTask(TASK_SITES, PATH_SITES, null);
     }
 
+    public void info(int siteId) {
+        runTask(TASK_SITE, String.format(PATH_SITE, siteId), null);
+    }
+
     public void energy(int siteId, Date startDate, Date endDate) {
         String path = String.format(PATH_ENERGY, siteId);
 
@@ -82,9 +88,11 @@ public class SolarEdge implements RESTTask.RESTListener {
 
         try {
             if (TASK_SITES.equals(task)) {
-                exception = processInfo(r);
+                exception = processSites(r);
             } else if (TASK_ENERGY.equals(task)) {
                 exception = processEnergy(r);
+            } else if (TASK_SITE.equals(task)) {
+                exception = processSite(r);
             }
         } catch (JSONException e) {
             exception = new SolarEdgeException("Failed to parse JSON: "+e.getMessage());
@@ -94,6 +102,8 @@ public class SolarEdge implements RESTTask.RESTListener {
             listener.onError(this, exception);
         }
     }
+
+
 
     private SolarEdgeException processEnergy(JSONObject r) throws JSONException {
         SolarEdgeEnergy result;
@@ -117,7 +127,19 @@ public class SolarEdge implements RESTTask.RESTListener {
         return null;
     }
 
-    private SolarEdgeException processInfo(JSONObject r) throws JSONException {
+    private SolarEdgeException processSite(JSONObject r) throws JSONException {
+        SolarEdgeInfo result;
+
+        result = new SolarEdgeInfo();
+        result.setId(r.getInt("id"));
+        result.setName(r.getString("name"));
+
+        listener.onInfo(this);
+
+        return null;
+    }
+
+    private SolarEdgeException processSites(JSONObject r) throws JSONException {
         SolarEdgeException exception = null;
         SolarEdgeInfo result;
         JSONObject sites_meta = r.getJSONObject("sites");
@@ -125,7 +147,7 @@ public class SolarEdge implements RESTTask.RESTListener {
         if (count == 0) {
             exception = new SolarEdgeException("No sites found for API key "+apikey);
         } else {
-            JSONArray sites = sites_meta.getJSONArray("site");
+            JSONArray sites = sites_meta.getJSONArray("info");
             for (int i = 0; i < sites.length(); i++) {
                 JSONObject theSite = sites.getJSONObject(i);
 
@@ -135,7 +157,7 @@ public class SolarEdge implements RESTTask.RESTListener {
 
                 setInfo(result);
 
-                listener.onSites(this);
+                listener.onSiteFound(this);
             }
         }
 

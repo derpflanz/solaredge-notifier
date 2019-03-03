@@ -19,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
         TODO A smooth way to input the API key (QR/OCR?)
         TODO More advanced ways of checking (averaging, looking back more days, etc, AI?)
         TODO Make a link from our notifier's "InstallationActivity" to the SolarEdge app if available
-        TODO Multi site per API key
+        TODO Multi info per API key
 
         (for release)
         [done] TODO Implement the InstallationActivity

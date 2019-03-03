@@ -12,12 +12,13 @@ import java.util.Set;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCallbacks {
+public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCallbacks, ISolarEdgeListener {
 
     private ListView lvApiKeys;
     private Persistent persistent;
     private ApiKeyAdapter apiKeyAdapter;
     private Set<String> apikeys;
+    private SiteStorage siteStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +27,8 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
         setTitle(R.string.manageapikeys);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        siteStorage = new SiteStorage(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -55,6 +58,11 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
         persistent.putStringToSet(PrefFragment.PREF_API_KEY, apikey);
         apikeys.add(apikey);
         apiKeyAdapter.notifyDataSetChanged();
+
+        siteStorage.delete(apikey);
+
+        SolarEdge solarEdge = new SolarEdge(this, apikey);
+        solarEdge.sites();
     }
 
     @Override
@@ -62,5 +70,23 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
         persistent.removeFromSet(PrefFragment.PREF_API_KEY, apikey);
         apikeys.remove(apikey);
         apiKeyAdapter.notifyDataSetChanged();
+
+        siteStorage.delete(apikey);
     }
+
+    @Override
+    public void onSiteFound(SolarEdge solarEdge) {
+        Site s = new Site(solarEdge.getApikey(), solarEdge.getInfo().getId());
+        s.setName(solarEdge.getInfo().getName());
+        siteStorage.add(s);
+    }
+
+    @Override
+    public void onError(SolarEdge solarEdge, SolarEdgeException exception) { }
+
+    @Override
+    public void onEnergy(SolarEdge solarEdge, SolarEdgeEnergy result) { }
+
+    @Override
+    public void onInfo(SolarEdge solarEdge) { }
 }

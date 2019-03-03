@@ -20,6 +20,7 @@ public class PrefFragment extends PreferenceFragment {
     public static final String PREF_OPTIONS = "options";
     public static final String PREF_API_KEY = "pref_api_key";
     public static final String PREF_LASTCHECK = "lastcheck";
+    public static final String PREF_SITES = "sites";
     private static final CharSequence PREF_EDITKEYS = "editkeys";
 
     public static final String OPT_WHENBELOW = "whenbelow";
@@ -35,6 +36,16 @@ public class PrefFragment extends PreferenceFragment {
         SwitchPreference enable = (SwitchPreference) findPreference(PREF_ENABLE);
         Preference editkeys = (Preference) findPreference(PREF_EDITKEYS);
         Preference lastcheck = findPreference(PREF_LASTCHECK);
+        Preference sites = findPreference(PREF_SITES);
+
+        SiteStorage siteStorage = new SiteStorage(getContext());
+
+        if (siteStorage.count() == 0) {
+            sites.setIcon(R.drawable.baseline_warning_24);
+            sites.setSummary(getString(R.string.nositesfound));
+        } else {
+            sites.setSummary(String.format(getString(R.string.d_sites), siteStorage.count()));
+        }
 
         Persistent p = new Persistent(getActivity());
         Set<String> keys = p.getStringSet(PREF_API_KEY, null);
