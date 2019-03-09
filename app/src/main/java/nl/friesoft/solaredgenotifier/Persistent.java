@@ -14,8 +14,8 @@ public class Persistent {
     Context ctx;
     SharedPreferences prefs;
 
-    public Persistent(Context _ctx) {
-        ctx = _ctx;
+    public Persistent(Context context) {
+        ctx = context;
         prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
     }
 

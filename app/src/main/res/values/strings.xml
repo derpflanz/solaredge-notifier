@@ -55,5 +55,6 @@
     <string name="nosites">No sites found. Add an API key or refresh the existing ones.</string>
     <string name="d_sites">%d sites.</string>
     <string name="nositesfound">No sites found. Add a valid API key to install sites.</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

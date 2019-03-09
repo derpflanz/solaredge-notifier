@@ -9,12 +9,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-class SolarEdgeEnergy {
+public class Energy {
     private String energyUnit;
 
     private HashMap<Date, Integer> energy;
 
-    public SolarEdgeEnergy() {
+    public Energy() {
         energy = new HashMap<>();
     }
 

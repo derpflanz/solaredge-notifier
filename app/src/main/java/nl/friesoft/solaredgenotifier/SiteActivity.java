@@ -9,7 +9,7 @@ import java.util.Calendar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class InstallationActivity extends AppCompatActivity implements ISolarEdgeListener {
+public class SiteActivity extends AppCompatActivity implements ISolarEdgeListener {
 
     private TextView tvInstallName;
     private TextView tvEnergyYesterday;
@@ -53,32 +53,33 @@ public class InstallationActivity extends AppCompatActivity implements ISolarEdg
             Calendar aweekago = Calendar.getInstance();
             aweekago.add(Calendar.DATE, -7);
 
-            SolarEdge edge = new SolarEdge(this, apikey);
-            edge.info(installId);
-            edge.energy(installId, aweekago.getTime(), yesterday.getTime());
+            SolarEdge edge = new SolarEdge(this);
+            Site s = new Site(apikey, installId);
+            edge.details(s);
+            edge.energy(s, aweekago.getTime(), yesterday.getTime());
         }
     }
 
     @Override
-    public void onSiteFound(SolarEdge solarEdge) {
+    public void onSiteFound(Site site) {
         // never called, we don't call sites()
     }
 
     @Override
-    public void onError(SolarEdge solarEdge, SolarEdgeException exception) {
+    public void onError(Site site, SolarEdgeException exception) {
 
     }
 
     @Override
-    public void onEnergy(SolarEdge solarEdge, SolarEdgeEnergy result) {
-        if (solarEdge.getInfo().getId() == installId) {
-            tvEnergyYesterday.setText(SolarEdgeEnergy.format(result.getLastEnergy()));
-            tvAvgLastWeek.setText(SolarEdgeEnergy.format(result.getAverageEnergy()));
+    public void onEnergy(Site site, Energy result) {
+        if (site.getId() == installId) {
+            tvEnergyYesterday.setText(Energy.format(result.getLastEnergy()));
+            tvAvgLastWeek.setText(Energy.format(result.getAverageEnergy()));
         }
     }
 
     @Override
-    public void onInfo(SolarEdge solarEdge) {
-        tvInstallName.setText(solarEdge.getInfo().getName());
+    public void onDetails(Site site) {
+        tvInstallName.setText(site.getName());
     }
 }

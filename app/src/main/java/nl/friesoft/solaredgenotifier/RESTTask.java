@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
@@ -31,6 +32,7 @@ public class RESTTask extends AsyncTask<String, String, JSONObject> {
     private String lastError;
     private JSONObject result = null;
     private String task;
+    private Site site;
 
     public void setUrl(String url) {
         this.url = url;
@@ -39,17 +41,20 @@ public class RESTTask extends AsyncTask<String, String, JSONObject> {
         this.verb = verb;
     }
 
+    public void setSite(Site site) {
+        this.site = site;
+    }
+
     private class DummyListener implements RESTListener {
         @Override
-        public void onError(String task, String m) { }
+        public void onError(String task, Site site, String m) { }
 
         @Override
-        public void onResult(String task, JSONObject r) { }
-
+        public void onResult(String task, Site site, JSONObject r) { }
     }
     public interface RESTListener {
-        void onError(String task, String m);
-        void onResult(String task, JSONObject r);
+        void onError(String task, Site site, String m);
+        void onResult(String task, Site site, JSONObject r);
     }
 
     public void setListener(RESTListener listener) {
@@ -69,16 +74,16 @@ public class RESTTask extends AsyncTask<String, String, JSONObject> {
         super.onPostExecute(s);
 
         if (lastError != null) {
-            listener.onError(task, lastError);
+            listener.onError(task, site, lastError);
         } else {
-            listener.onResult(task, s);
+            listener.onResult(task, site, s);
         }
     }
 
     private void setSSL() {
         TrustManager[] trustAllCerts = new TrustManager[] {
             new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                public X509Certificate[] getAcceptedIssuers() {
                     return null;
                 }
                 public void checkClientTrusted(X509Certificate[] certs, String authType) {
@@ -91,7 +96,7 @@ public class RESTTask extends AsyncTask<String, String, JSONObject> {
         // Install the all-trusting trust manager
         try {
             SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            sc.init(null, trustAllCerts, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         } catch (Exception e) {
             Log.e(MainActivity.TAG, "Error: "+e.getMessage());

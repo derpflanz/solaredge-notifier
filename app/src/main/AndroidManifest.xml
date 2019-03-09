@@ -23,7 +23,7 @@
                 android:value="nl.friesoft.solaredgenotifier.MainActivity"/>
         </activity>
         <activity
-            android:name=".InstallationActivity"
+            android:name=".SiteActivity"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

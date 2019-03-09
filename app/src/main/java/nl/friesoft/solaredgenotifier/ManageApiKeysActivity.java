@@ -13,12 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCallbacks, ISolarEdgeListener {
-
     private ListView lvApiKeys;
     private Persistent persistent;
     private ApiKeyAdapter apiKeyAdapter;
-    private Set<String> apikeys;
     private SiteStorage siteStorage;
+
+    // this Set is the the ListView's underlying DataSet
+    private Set<String> apikeys;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +64,8 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
         siteStorage.delete(apikey);
 
         setProgressBarIndeterminateVisibility(true);
-        SolarEdge solarEdge = new SolarEdge(this, apikey);
-        solarEdge.sites();
+        SolarEdge solarEdge = new SolarEdge(this);
+        solarEdge.sites(apikey);
     }
 
     @Override
@@ -77,20 +78,18 @@ public class ManageApiKeysActivity extends AppCompatActivity implements ApiKeyCa
     }
 
     @Override
-    public void onSiteFound(SolarEdge solarEdge) {
-        Site s = new Site(solarEdge.getApikey(), solarEdge.getInfo().getId());
-        s.setName(solarEdge.getInfo().getName());
-        siteStorage.add(s);
+    public void onSiteFound(Site site) {
+        siteStorage.add(site);
 
         setProgressBarIndeterminateVisibility(false);
     }
 
     @Override
-    public void onError(SolarEdge solarEdge, SolarEdgeException exception) { }
+    public void onError(Site site, SolarEdgeException exception) { }
 
     @Override
-    public void onEnergy(SolarEdge solarEdge, SolarEdgeEnergy result) { }
+    public void onEnergy(Site site, Energy result) { }
 
     @Override
-    public void onInfo(SolarEdge solarEdge) { }
+    public void onDetails(Site site) { }
 }

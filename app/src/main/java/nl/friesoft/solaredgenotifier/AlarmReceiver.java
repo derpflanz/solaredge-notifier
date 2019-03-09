@@ -69,7 +69,6 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     @Override
     public void onReceive(Context _context, Intent intent) {
         context = _context;
-
         createNotificationChannels();
 
         // when we are fired, we start checking immediately
@@ -79,7 +78,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         if (apikeys.size() == 0) {
             // If not API keys are set when the alarm goes, we log this,
             // but don't do anything else.
-            // The MainActivity should give enough info on how the whole thing
+            // The MainActivity should give enough details on how the whole thing
             // works.
             Log.e(MainActivity.TAG, "No API keys set!");
 
@@ -93,18 +92,18 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
                 for (String apikey : apikeys) {
                     // We call sites(), because we want all sites connected to the
                     // API keys. onSiteFound() will be possibly called more than once
-                    SolarEdge sol = new SolarEdge(this, apikey);
-                    sol.sites();
+                    SolarEdge sol = new SolarEdge(this);
+                    sol.sites(apikey);
                 }
             }
         }
     }
 
-    private PendingIntent getPendingIntent(SolarEdge solarEdge, int reason) {
-        String apikey = solarEdge.getApikey();
-        int installationId = solarEdge.getInfo().getId();
+    private PendingIntent getPendingIntent(Site site, int reason) {
+        String apikey = site.getApikey();
+        int installationId = site.getId();
 
-        Intent intent = new Intent(context, InstallationActivity.class);
+        Intent intent = new Intent(context, SiteActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(EXTRA_API_KEY, apikey);
         intent.putExtra(EXTRA_INSTALLATION_ID, installationId);
@@ -115,20 +114,21 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     }
 
     @Override
-    public void onSiteFound(SolarEdge solarEdge) {
-        Log.i(MainActivity.TAG, String.format("API key %s matches installation %s.", solarEdge.getApikey(), solarEdge.getInfo().getName()));
+    public void onSiteFound(Site site) {
+        Log.i(MainActivity.TAG, String.format("API key %s matches installation %s.", site.getApikey(), site.getName()));
 
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, -1);
 
-        solarEdge.energy(solarEdge.getInfo().getId(), cal.getTime(), cal.getTime());
+        SolarEdge solarEdge = new SolarEdge(this);
+        solarEdge.energy(site, cal.getTime(), cal.getTime());
 
         Check c = new Check(Check.Type.SUCCESS);
         persistent.putString(PrefFragment.PREF_LASTCHECK, c.toString());
     }
 
     @Override
-    public void onError(SolarEdge solarEdge, SolarEdgeException exception) {
+    public void onError(Site site, SolarEdgeException exception) {
         Log.e(MainActivity.TAG, "Some error occurred: "+exception.getMessage());
 
         // on error, try again in 15 minutes
@@ -139,8 +139,8 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     }
 
     @Override
-    public void onEnergy(SolarEdge solarEdge, SolarEdgeEnergy result) {
-        Log.i(MainActivity.TAG, String.format("%s had %d Wh", solarEdge.getInfo().getName(), result.getTotalEnergy()));
+    public void onEnergy(Site site, Energy result) {
+        Log.i(MainActivity.TAG, String.format("%s had %d Wh", site.getName(), result.getTotalEnergy()));
 
         // by default, we only notify when no output is generated
         long min_energy = 0;
@@ -167,16 +167,16 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
                 // when set to MAX_VALUE, we use a slightly nicer message
                 title = context.getString(R.string.output);
                 message = String.format(context.getString(R.string.energyoutput),
-                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()));
+                        site.getName(), Energy.format(result.getTotalEnergy()));
                 longmessage = String.format(context.getString(R.string.output_trend),
-                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()));
+                        site.getName(), Energy.format(result.getTotalEnergy()));
                 icon = R.drawable.outline_wb_sunny_24;
             } else {
                 title = context.getString(R.string.outputbelowlevel);
                 message = String.format(context.getString(R.string.energyoutput),
-                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()));
+                        site.getName(), Energy.format(result.getTotalEnergy()));
                 longmessage = String.format(context.getString(R.string.outputlow_long),
-                        solarEdge.getInfo().getName(), SolarEdgeEnergy.format(result.getTotalEnergy()), min_energy);
+                        site.getName(), Energy.format(result.getTotalEnergy()), min_energy);
                 icon = R.drawable.outline_wb_cloudy_24;
                 reason = REASON_ERROR;
             }
@@ -187,7 +187,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
                     .setContentText(message)
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(longmessage))
-                    .setContentIntent(getPendingIntent(solarEdge, reason))
+                    .setContentIntent(getPendingIntent(site, reason))
                     .setAutoCancel(true)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
@@ -195,7 +195,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
 
             // notificationId is a unique int for each notification that you must define
             // we use the installation's ID to make sure all notifications get sent
-            notificationManager.notify(solarEdge.getInfo().getId(), mBuilder.build());
+            notificationManager.notify(site.getId(), mBuilder.build());
         }
 
         // success, check again tomorrow
@@ -203,8 +203,8 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     }
 
     @Override
-    public void onInfo(SolarEdge solarEdge) {
-        // never entered, we don't call 'info()'
+    public void onDetails(Site site) {
+        // never entered, we don't call 'details()'
     }
 
     private void createNotificationChannels() {

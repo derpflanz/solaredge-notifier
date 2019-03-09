@@ -1,9 +1,9 @@
 package nl.friesoft.solaredgenotifier;
 
 interface ISolarEdgeListener {
-    void onSiteFound(SolarEdge solarEdge);
-    void onError(SolarEdge solarEdge, SolarEdgeException exception);
-    void onEnergy(SolarEdge solarEdge, SolarEdgeEnergy result);
+    void onSiteFound(Site site);
+    void onError(Site site, SolarEdgeException exception);
+    void onEnergy(Site site, Energy result);
 
-    void onInfo(SolarEdge solarEdge);
+    void onDetails(Site site);
 }
