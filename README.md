@@ -21,9 +21,9 @@ The main activity
 The main activity shows the settings of the Notifier. It also has tools
 to manage API keys and a way to show the current state of the Sites.
 
-o Enable/Disable: globally enable or disable the notifier. This can come in
+* Enable/Disable: globally enable or disable the notifier. This can come in
   handy when you temporarily want not to receive messages.
-o When to notify / Threshold: configure the way the Notifier works
-o Manage API keys: add or remove API keys. API keys can be obtained from the
+* When to notify / Threshold: configure the way the Notifier works
+* Manage API keys: add or remove API keys. API keys can be obtained from the
   installer of the system.
-o Sites: opens list of the currently found Sites from the API keys
+* Sites: opens list of the currently found Sites from the API keys
