@@ -1,75 +1,8 @@
-HOW IT WORKS
-============
-
-The alarm
----------
-1. An alarm is set to broadcast an intent "AlarmReceiver"
-2. This intent goes to the server and receives solar output of "yesterday"
-3. If the server does not respond, try again in 15 minutes
-4. If the server responds, try again in 24 hours
-5. If there is a response, process it:
-    5a. If set to always, notify with output of yesterday
-    5b. If set to threshold, check threshold and notify if lower
-6. If notification is tapped, open the DiagActivity to show yesterday,
-    last week, last month output
-
-The main activity
------------------
-The main activity shows the settings of the Notifier. It also has tools
-to manage API keys and a way to show the current state of the Sites.
-
-o Enable/Disable: globally enable or disable the notifier. This can come in
-  handy when you temporarily want not to receive messages.
-o When to notify / Threshold: configure the way the Notifier works
-o Manage API keys: add or remove API keys. API keys can be obtained from the
-  installer of the system.
-o Sites: opens list of the currently found Sites from the API keys
-
-
-ROADMAP
-=======
-v1.3 (released)
-o Implement the SitesActivity
-
-v1.3.1 (released)
-o Fix a bug with the SQLite database
-
-v1.4
-o Implement Intent from SitesActivity to SiteActivity
-o Give all Activities a Toolbar head
-o Add swipe-to-refresh to SitesActivity
-
-v2.0
-o Make the Notification singular, with a different icon if more than
-  one site was being notified. When tapped, open the SitesActivity.
-o Show an alert in the SitesActivity next to the Site that had an alert.
-
-BUGS
-====
-  1. IndeterminateProgressBar in the Toolbar doesn't work (ApiActivity)
-
-RELEASE NOTES
-=============
-v1.1 -- initial release
-[dropped] TODO Timed notification, on a certain time every day
-[done] TODO Notification whenever output is below a certain value, or 'always' (min_energy = maxlong)
-[done] TODO Store settings on phone
-[done] TODO Enable / disable notifier
-[done] TODO Create MainActivity to change settings
-[done] TODO Multi system (multi API key) support
-[done] TODO Implement the SiteActivity
-[dropped] TODO Implement the no API keys notification
-[done] TODO Start alarmmanager on boot
-[done] TODO (bug) The PendingIntent in the Notification always gives one API/InstallId
-
 FUTURE WORK
 ===========
 This list of features show possible additions to the app. They might be dropped or be implemented
-completely differently.
+completely differently. They are not in the GitHub issue list yet
 
 TODO A smooth way to input the API key (QR/OCR?)
 TODO More advanced ways of checking (averaging, looking back more days, etc, AI?)
 TODO Make a link from our notifier's "SiteActivity" to the SolarEdge app if available
-[done] TODO Multi details per API key
-TODO Indeterminate progressbar in ApiKeyActivity
-TODO Menu to refresh data in ApiKeyActivity
