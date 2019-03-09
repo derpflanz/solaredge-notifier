@@ -56,5 +56,6 @@
     <string name="d_sites">%d sites.</string>
     <string name="nositesfound">No sites found. Add a valid API key to install sites.</string>
     <string name="refresh">Refresh</string>
+    <string name="ph_version">1.3.23</string>
 
 </resources>

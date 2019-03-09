@@ -10,6 +10,12 @@ class SiteStorage(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, D
         val add_city = "ALTER TABLE $TBL_SITES ADD COLUMN $COL_CITY text"
         val add_country = "ALTER TABLE $TBL_SITES ADD COLUMN $COL_COUNTRY text"
 
+        /* How to handle database upgrades?
+           1. Define the update that goes with a certain_version
+           2. Place the ALTER commands in a if (oldVersion < certain_version) block
+           3. Update the onCreate to have the final last super version
+         */
+
         if (oldVersion < 2) {
             db?.execSQL(add_city)
             db?.execSQL(add_country)
@@ -18,7 +24,7 @@ class SiteStorage(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, D
 
     override fun onCreate(db: SQLiteDatabase?) {
         val CREATE_TABLE = "CREATE TABLE $TBL_SITES ($COL_APIKEY text, $COL_ID integer, $COL_NAME text, " +
-                "PRIMARY KEY ($COL_APIKEY, $COL_ID))"
+                "$COL_COUNTRY text, $COL_CITY text, PRIMARY KEY ($COL_APIKEY, $COL_ID))"
         db?.execSQL(CREATE_TABLE)
     }
 

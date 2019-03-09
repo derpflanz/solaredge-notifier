@@ -28,8 +28,11 @@ o Sites: opens list of the currently found Sites from the API keys
 
 ROADMAP
 =======
-v1.3
+v1.3 (released)
 o Implement the SitesActivity
+
+v1.3.1 (released)
+o Fix a bug with the SQLite database
 
 v1.4
 o Implement Intent from SitesActivity to SiteActivity

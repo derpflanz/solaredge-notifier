@@ -1,7 +1,9 @@
 package nl.friesoft.solaredgenotifier;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,7 +17,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        TextView tvVersion = findViewById(R.id.tvVersion);
+        try {
+            tvVersion.setText(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+        } catch (PackageManager.NameNotFoundException nnfe) {
+            tvVersion.setText("");
+        }
         persistent = new Persistent(this);
 
         if (persistent.getBoolean(PrefFragment.PREF_ENABLE, true)) {
