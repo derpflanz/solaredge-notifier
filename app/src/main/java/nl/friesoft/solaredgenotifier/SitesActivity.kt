@@ -1,6 +1,7 @@
 package nl.friesoft.solaredgenotifier
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.BaseAdapter
@@ -42,6 +43,13 @@ class SitesActivity : AppCompatActivity(), ISolarEdgeListener {
 
         adapter = SiteAdapter(this, siteStorage)
         lvSites.adapter = adapter
+
+        lvSites.setOnItemClickListener{ adapterView, view, i, l ->
+            var intent: Intent = Intent(this, SiteActivity::class.java)
+            intent.putExtra(AlarmReceiver.EXTRA_API_KEY, (adapter.getItem(i) as Site).apikey)
+            intent.putExtra(AlarmReceiver.EXTRA_INSTALLATION_ID, (adapter.getItem(i) as Site).id)
+            startActivity(intent)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

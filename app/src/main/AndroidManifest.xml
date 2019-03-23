@@ -24,7 +24,7 @@
         </activity>
         <activity
             android:name=".SiteActivity"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".SitesActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
