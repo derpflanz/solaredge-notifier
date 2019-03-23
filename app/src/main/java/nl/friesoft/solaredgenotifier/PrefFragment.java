@@ -23,7 +23,9 @@ public class PrefFragment extends PreferenceFragment {
     public static final String PREF_SITES = "sites";
     private static final CharSequence PREF_EDITKEYS = "editkeys";
 
-    public static final String OPT_WHENBELOW = "whenbelow";
+    public static final String OPT_WHENBELOWFIX = "whenbelowfixed";
+    public static final String OPT_WHENBELOWAVG = "whenbelowaverage";
+
     public static final long OPT_MIN_ENERGY = Long.MAX_VALUE;
 
 
@@ -69,7 +71,7 @@ public class PrefFragment extends PreferenceFragment {
         });
         updateLastCheck(lastcheck);
 
-        if (OPT_WHENBELOW.equals(options.getValue())) {
+        if (OPT_WHENBELOWFIX.equals(options.getValue())) {
             threshold.setEnabled(true);
         } else {
             threshold.setEnabled(false);
@@ -79,7 +81,7 @@ public class PrefFragment extends PreferenceFragment {
         options.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if (OPT_WHENBELOW.equals(newValue)) {
+                if (OPT_WHENBELOWFIX.equals(newValue)) {
                     threshold.setEnabled(true);
                 } else {
                     threshold.setEnabled(false);

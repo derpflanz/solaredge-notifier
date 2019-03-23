@@ -30,7 +30,8 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     Context context;
 
     public static int REASON_ALLOK = 0;
-    public static int REASON_ERROR = 1;
+    public static int REASON_BELOWFIXED = 1;
+    public static int REASON_BELOWAVG = 2;
 
     private static final long INTERVAL_ERROR = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
     private static final long INTERVAL_SUCCESS = AlarmManager.INTERVAL_DAY;
@@ -117,11 +118,14 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     public void onSiteFound(Site site) {
         Log.i(MainActivity.TAG, String.format("API key %s matches installation %s.", site.getApikey(), site.getName()));
 
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -1);
+        Calendar aweekago = Calendar.getInstance();
+        aweekago.add(Calendar.DATE, -8);
+
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DATE, -1);
 
         SolarEdge solarEdge = new SolarEdge(this);
-        solarEdge.energy(site, cal.getTime(), cal.getTime());
+        solarEdge.energy(site, aweekago.getTime(), yesterday.getTime());
 
         Check c = new Check(Check.Type.SUCCESS);
         persistent.putString(PrefFragment.PREF_LASTCHECK, c.toString());
@@ -141,44 +145,52 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     @Override
     public void onEnergy(Site site, Energy result) {
         Log.i(MainActivity.TAG, String.format("%s had %d Wh", site.getName(), result.getTotalEnergy()));
+        String title;
 
         // by default, we only notify when no output is generated
-        long min_energy = 0;
+        long energy_threshold = 0;
         int reason = REASON_ALLOK;
-        String option = persistent.getString(PrefFragment.PREF_OPTIONS, PrefFragment.OPT_WHENBELOW);
-        if (PrefFragment.OPT_WHENBELOW.equals(option)) {
+        String option = persistent.getString(PrefFragment.PREF_OPTIONS, PrefFragment.OPT_WHENBELOWFIX);
+        if (PrefFragment.OPT_WHENBELOWFIX.equals(option)) {
             String threshold = persistent.getString(PrefFragment.PREF_THRESHOLD, "");
+            reason = REASON_BELOWFIXED;
 
             try {
-                min_energy = Long.parseLong(threshold);
+                energy_threshold = Long.parseLong(threshold);
             } catch (NumberFormatException nfe) {
-                min_energy = PrefFragment.OPT_MIN_ENERGY;
+                energy_threshold = PrefFragment.OPT_MIN_ENERGY;
             }
+
+            title = context.getString(R.string.outputbelowlevel);
+        } else if (PrefFragment.OPT_WHENBELOWAVG.equals(option)) {
+            energy_threshold = result.getAverageEnergy();
+            reason = REASON_BELOWAVG;
+
+            title = context.getString(R.string.outputbelowavg);
         } else {
             // option set to daily, so the min_energy level is MAX
-            min_energy = PrefFragment.OPT_MIN_ENERGY;
+            energy_threshold = PrefFragment.OPT_MIN_ENERGY;
+
+            title = context.getString(R.string.output);
         }
 
-        if (result.getTotalEnergy() < min_energy) {
-            String message, longmessage, title;
+        if (result.getDailyEnergy(-1) < energy_threshold) {
+            String message, longmessage;
             int icon;
 
-            if (min_energy == Long.MAX_VALUE) {
+            if (energy_threshold == Long.MAX_VALUE) {
                 // when set to MAX_VALUE, we use a slightly nicer message
-                title = context.getString(R.string.output);
                 message = String.format(context.getString(R.string.energyoutput),
                         site.getName(), Energy.format(result.getTotalEnergy()));
                 longmessage = String.format(context.getString(R.string.output_trend),
                         site.getName(), Energy.format(result.getTotalEnergy()));
                 icon = R.drawable.outline_wb_sunny_24;
             } else {
-                title = context.getString(R.string.outputbelowlevel);
                 message = String.format(context.getString(R.string.energyoutput),
                         site.getName(), Energy.format(result.getTotalEnergy()));
                 longmessage = String.format(context.getString(R.string.outputlow_long),
-                        site.getName(), Energy.format(result.getTotalEnergy()), min_energy);
+                        site.getName(), Energy.format(result.getTotalEnergy()), energy_threshold);
                 icon = R.drawable.outline_wb_cloudy_24;
-                reason = REASON_ERROR;
             }
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, CHANNEL_OUTPUT_LEVELS)

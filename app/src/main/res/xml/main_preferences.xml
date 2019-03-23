@@ -6,7 +6,6 @@
         android:key="enabled"
         android:title="@string/enable"/>
 
-
     <ListPreference
         android:defaultValue="whenbelow"
         android:dependency="enabled"
@@ -15,7 +14,6 @@
         android:key="options"
         android:summary="%s"
         android:title="@string/options"/>
-
 
     <EditTextPreference
         android:defaultValue="5"

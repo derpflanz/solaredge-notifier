@@ -39,7 +39,7 @@ public class SiteActivity extends AppCompatActivity implements ISolarEdgeListene
             installId = b.getInt(AlarmReceiver.EXTRA_INSTALLATION_ID);
             reason = b.getInt(AlarmReceiver.EXTRA_REASON);
 
-            if (reason == AlarmReceiver.REASON_ERROR) {
+            if (reason == AlarmReceiver.REASON_BELOWFIXED) {
                 ivStatus.setImageResource(R.drawable.outline_wb_cloudy_black_48);
             } else {
                 ivStatus.setImageResource(R.drawable.outline_wb_sunny_black_48);
@@ -73,7 +73,7 @@ public class SiteActivity extends AppCompatActivity implements ISolarEdgeListene
     @Override
     public void onEnergy(Site site, Energy result) {
         if (site.getId() == installId) {
-            tvEnergyYesterday.setText(Energy.format(result.getLastEnergy()));
+            tvEnergyYesterday.setText(Energy.format(result.getDailyEnergy(-1)));
             tvAvgLastWeek.setText(Energy.format(result.getAverageEnergy()));
         }
     }
