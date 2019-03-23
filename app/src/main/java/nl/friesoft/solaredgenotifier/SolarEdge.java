@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import kotlin.NotImplementedError;
-
 public class SolarEdge implements RESTTask.RESTListener {
     // We will be using the NREL API to get site on max power
     // API KEY = kY9ZgQd5eEimTxw09rfjwRK2bP4JcXvKtvA2D1f7
@@ -125,20 +123,18 @@ public class SolarEdge implements RESTTask.RESTListener {
         return null;
     }
 
-    private SolarEdgeException processDetails(Site site, JSONObject r) throws JSONException {
-        // TODO read extended details of the site
+    private SolarEdgeException processDetails(Site abstract_site, JSONObject r) throws JSONException {
+        JSONObject details = r.getJSONObject("details");
+        Site site = new Site(abstract_site.getApikey(), abstract_site.getId());
+        site.setName(details.getString("name"));
+
+        JSONObject location = details.getJSONObject("location");
+        site.setCity(location.getString("city"));
+        site.setCountry(location.getString("country"));
+
         listener.onDetails(site);
 
-        throw new NotImplementedError();
-//        SolarEdgeInfo result;
-//
-//        result = new SolarEdgeInfo();
-//        result.setId(r.getInt("id"));
-//        result.setName(r.getString("name"));
-//
-//        listener.onDetails(this);
-
-//        return null;
+        return null;
     }
 
     private SolarEdgeException processSites(Site abstract_site, JSONObject r) throws JSONException {
