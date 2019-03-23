@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,15 +24,10 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     private static final String CHANNEL_OUTPUT_LEVELS = "OUTPUTLEVELS";
     public static final String EXTRA_API_KEY = "EXTRA_API_KEY";
     public static final String EXTRA_INSTALLATION_ID = "EXTRA_INSTALLATION_ID";
-    public static final String EXTRA_REASON = "EXTRA_REASON";
-    private static final int REQ_APIKEYS = 1;
-    private static final String CHANNEL_WARNINGS = "WARNINGS";
+    public static final String EXTRA_STATUS = "EXTRA_STATUS";
+
     Persistent persistent;
     Context context;
-
-    public static int REASON_ALLOK = 0;
-    public static int REASON_BELOWFIXED = 1;
-    public static int REASON_BELOWAVG = 2;
 
     private static final long INTERVAL_ERROR = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
     private static final long INTERVAL_SUCCESS = AlarmManager.INTERVAL_DAY;
@@ -108,7 +104,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(EXTRA_API_KEY, apikey);
         intent.putExtra(EXTRA_INSTALLATION_ID, installationId);
-        intent.putExtra(EXTRA_REASON, reason);
+        intent.putExtra(EXTRA_STATUS, reason);
 
         Log.d(MainActivity.TAG, "Created intent with "+apikey+" and "+installationId);
         return PendingIntent.getActivity(context, installationId, intent, 0);
@@ -145,73 +141,84 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     @Override
     public void onEnergy(Site site, Energy result) {
         Log.i(MainActivity.TAG, String.format("%s had %d Wh", site.getName(), result.getTotalEnergy()));
+
         String title;
+        long energy_threshold;
+        int status;
 
-        // by default, we only notify when no output is generated
-        long energy_threshold = 0;
-        int reason = REASON_ALLOK;
-        String option = persistent.getString(PrefFragment.PREF_OPTIONS, PrefFragment.OPT_WHENBELOWFIX);
-        if (PrefFragment.OPT_WHENBELOWFIX.equals(option)) {
-            String threshold = persistent.getString(PrefFragment.PREF_THRESHOLD, "");
-            reason = REASON_BELOWFIXED;
+        // read the options
+        String option = persistent.getString(PrefFragment.PREF_OPTIONS, PrefFragment.OPT_DAILY);
+        String set_threshold = persistent.getString(PrefFragment.PREF_THRESHOLD, "0");
 
-            try {
-                energy_threshold = Long.parseLong(threshold);
-            } catch (NumberFormatException nfe) {
-                energy_threshold = PrefFragment.OPT_MIN_ENERGY;
-            }
-
-            title = context.getString(R.string.outputbelowlevel);
-        } else if (PrefFragment.OPT_WHENBELOWAVG.equals(option)) {
-            energy_threshold = result.getAverageEnergy();
-            reason = REASON_BELOWAVG;
-
-            title = context.getString(R.string.outputbelowavg);
-        } else {
-            // option set to daily, so the min_energy level is MAX
-            energy_threshold = PrefFragment.OPT_MIN_ENERGY;
-
-            title = context.getString(R.string.output);
+        switch (option) {
+            default:
+            case PrefFragment.OPT_DAILY:
+                energy_threshold = PrefFragment.OPT_MAX_ENERGY;
+                status = Site.STATUS_OK;
+                title = context.getString(R.string.output);
+                break;
+            case PrefFragment.OPT_WHENBELOWAVG:
+                energy_threshold = result.getAverageEnergy();
+                status = Site.STATUS_BELOWAVG;
+                title = context.getString(R.string.outputbelowavg);
+                break;
+            case PrefFragment.OPT_WHENBELOWFIX:
+                energy_threshold = Long.parseLong(set_threshold);
+                status = Site.STATUS_BELOWFIXED;
+                title = context.getString(R.string.outputbelowlevel);
+                break;
         }
 
+        int update_status = Site.STATUS_OK;
         if (result.getDailyEnergy(-1) < energy_threshold) {
-            String message, longmessage;
-            int icon;
-
-            if (energy_threshold == Long.MAX_VALUE) {
-                // when set to MAX_VALUE, we use a slightly nicer message
-                message = String.format(context.getString(R.string.energyoutput),
-                        site.getName(), Energy.format(result.getTotalEnergy()));
-                longmessage = String.format(context.getString(R.string.output_trend),
-                        site.getName(), Energy.format(result.getTotalEnergy()));
-                icon = R.drawable.outline_wb_sunny_24;
-            } else {
-                message = String.format(context.getString(R.string.energyoutput),
-                        site.getName(), Energy.format(result.getTotalEnergy()));
-                longmessage = String.format(context.getString(R.string.outputlow_long),
-                        site.getName(), Energy.format(result.getTotalEnergy()), energy_threshold);
-                icon = R.drawable.outline_wb_cloudy_24;
-            }
-
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, CHANNEL_OUTPUT_LEVELS)
-                    .setSmallIcon(icon)
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText(longmessage))
-                    .setContentIntent(getPendingIntent(site, reason))
-                    .setAutoCancel(true)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-
-            // notificationId is a unique int for each notification that you must define
-            // we use the installation's ID to make sure all notifications get sent
-            notificationManager.notify(site.getId(), mBuilder.build());
+            update_status = status;
+            createNotification(site, result, title, energy_threshold, status);
         }
+
+        // update the status of the site
+        ContentValues cv = new ContentValues();
+        SiteStorage storage = new SiteStorage(context);
+        cv.put(SiteStorage.COL_STATUS, update_status);
+        storage.update(site, cv);
 
         // success, check again tomorrow
         setAlarm(context, INTERVAL_SUCCESS);
+    }
+
+    void createNotification(Site site, Energy result, String title, long energy_threshold, int status) {
+        String message, longmessage;
+        int icon;
+
+        if (energy_threshold == Long.MAX_VALUE) {
+            // when set to MAX_VALUE, we use a slightly nicer message
+            message = String.format(context.getString(R.string.energyoutput),
+                    site.getName(), Energy.format(result.getTotalEnergy()));
+            longmessage = String.format(context.getString(R.string.output_trend),
+                    site.getName(), Energy.format(result.getTotalEnergy()));
+            icon = R.drawable.outline_wb_sunny_24;
+        } else {
+            message = String.format(context.getString(R.string.energyoutput),
+                    site.getName(), Energy.format(result.getTotalEnergy()));
+            longmessage = String.format(context.getString(R.string.outputlow_long),
+                    site.getName(), Energy.format(result.getTotalEnergy()), energy_threshold);
+            icon = R.drawable.outline_wb_cloudy_24;
+        }
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, CHANNEL_OUTPUT_LEVELS)
+                .setSmallIcon(icon)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(longmessage))
+                .setContentIntent(getPendingIntent(site, status))
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+
+        // notificationId is a unique int for each notification that you must define
+        // we use the installation's ID to make sure all notifications get sent
+        notificationManager.notify(site.getId(), mBuilder.build());
     }
 
     @Override

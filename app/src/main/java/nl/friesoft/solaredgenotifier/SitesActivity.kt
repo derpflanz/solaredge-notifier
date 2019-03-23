@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -84,12 +85,19 @@ class SiteAdapter(ctx: Context, siteStorage: SiteStorage) : BaseAdapter() {
     val siteStorage = siteStorage
 
     override fun getView(i: Int, view: View?, viewGroup: ViewGroup?): View {
-        val newView = view ?: mInflater.inflate(android.R.layout.simple_list_item_2, viewGroup, false)
+        val newView = view ?: mInflater.inflate(R.layout.list_item_site, viewGroup, false)
 
         val site = siteStorage.get(i)
 
-        newView.findViewById<TextView>(android.R.id.text1).setText(site.name)
-        newView.findViewById<TextView>(android.R.id.text2).setText(String.format("%s, %s", site.city, site.country))
+        newView.findViewById<TextView>(R.id.tvName).setText(site.name)
+        newView.findViewById<TextView>(R.id.tvLocation).setText(String.format("%s, %s", site.city, site.country))
+
+        val ivStatus = newView.findViewById<ImageView>(R.id.ivStatus)
+        when (site.status) {
+            Site.STATUS_BELOWAVG -> ivStatus.setImageResource(R.drawable.outline_wb_cloudy_24)
+            Site.STATUS_BELOWFIXED -> ivStatus.setImageResource(R.drawable.baseline_warning_24)
+            else -> ivStatus.setImageResource(R.drawable.outline_wb_sunny_24)
+        }
 
         return newView
     }

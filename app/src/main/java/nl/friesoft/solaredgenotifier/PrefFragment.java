@@ -23,10 +23,12 @@ public class PrefFragment extends PreferenceFragment {
     public static final String PREF_SITES = "sites";
     private static final CharSequence PREF_EDITKEYS = "editkeys";
 
+    // possible notify methods
+    public static final String OPT_DAILY = "daily";
     public static final String OPT_WHENBELOWFIX = "whenbelowfixed";
     public static final String OPT_WHENBELOWAVG = "whenbelowaverage";
 
-    public static final long OPT_MIN_ENERGY = Long.MAX_VALUE;
+    public static final long OPT_MAX_ENERGY = Long.MAX_VALUE;
 
 
     @Override

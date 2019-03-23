@@ -19,7 +19,7 @@ public class SiteActivity extends AppCompatActivity implements ISolarEdgeListene
 
     private String apikey;
     private int installId;
-    private int reason;
+    private int status;
     private ImageView ivStatus;
 
     @Override
@@ -30,6 +30,8 @@ public class SiteActivity extends AppCompatActivity implements ISolarEdgeListene
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        setTitle(R.string.siteinfo);
 
         tvApiId = findViewById(R.id.tvApiId);
         tvInstallName = findViewById(R.id.tvInstallName);
@@ -42,9 +44,9 @@ public class SiteActivity extends AppCompatActivity implements ISolarEdgeListene
         if (b != null) {
             apikey = b.getString(AlarmReceiver.EXTRA_API_KEY);
             installId = b.getInt(AlarmReceiver.EXTRA_INSTALLATION_ID);
-            reason = b.getInt(AlarmReceiver.EXTRA_REASON);
+            status = b.getInt(AlarmReceiver.EXTRA_STATUS);
 
-            if (reason == AlarmReceiver.REASON_BELOWFIXED) {
+            if (status == Site.STATUS_BELOWFIXED || status == Site.STATUS_BELOWAVG) {
                 ivStatus.setImageResource(R.drawable.outline_wb_cloudy_black_48);
             } else {
                 ivStatus.setImageResource(R.drawable.outline_wb_sunny_black_48);

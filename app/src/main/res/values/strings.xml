@@ -58,5 +58,7 @@
     <string name="refresh">Refresh</string>
     <string name="ph_version">1.3.23</string>
     <string name="outputbelowavg">Energy below last week\'s average.</string>
+    <string name="siteinfo">Site Info</string>
+    <string name="ph_location">Somewhere, Someplace</string>
 
 </resources>
