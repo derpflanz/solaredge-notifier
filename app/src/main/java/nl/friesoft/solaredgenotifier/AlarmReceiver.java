@@ -115,7 +115,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         Log.i(MainActivity.TAG, String.format("API key %s matches installation %s.", site.getApikey(), site.getName()));
 
         Calendar aweekago = Calendar.getInstance();
-        aweekago.add(Calendar.DATE, -8);
+        aweekago.add(Calendar.DATE, -7);
 
         Calendar yesterday = Calendar.getInstance();
         yesterday.add(Calendar.DATE, -1);
