@@ -25,7 +25,7 @@ public class SiteActivity extends AppCompatActivity implements ISolarEdgeListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_installation);
+        setContentView(R.layout.activity_site);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

@@ -34,9 +34,7 @@
     <string name="installname">Installation name</string>
     <string name="ph_installname">Some Example Solar</string>
     <string name="energyyesterday">Energy yesterday</string>
-    <string name="ph_energyyesterday">495 Wh</string>
     <string name="avgenergylastweek">Average daily output last seven days</string>
-    <string name="ph_apikey_id">API 7W2265S86DQXAJKDBJYTEDYZLRSA817F / ID 18800</string>
     <string name="noapikeys">No API keys set</string>
     <plurals name="configured_n_keys">
         <item quantity="one">Configured %d key.</item>
@@ -60,5 +58,8 @@
     <string name="outputbelowavg">Energy below last week\'s average.</string>
     <string name="siteinfo">Site Info</string>
     <string name="ph_location">Somewhere, Someplace</string>
+    <string name="loading">Loading…</string>
+    <string name="unknownenergy">— kWh</string>
+    <string name="emptyapi_key_id">API — / ID —</string>
 
 </resources>
