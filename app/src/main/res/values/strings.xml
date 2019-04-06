@@ -7,7 +7,7 @@
     <string name="output_level_descr">Notifies you of low energy output of any SolarEdge installation.</string>
     <string name="outputbelowlevel">SolarEdge output too low!</string>
     <string name="energyoutput">%s had an energy output of %s yesterday.</string>
-    <string name="outputlow_long">Your SolarEdge installation \'%s\' reached an energy output of only %s yesterday, which is lower than the threshold set of %d.</string>
+    <string name="outputlow_long">Your SolarEdge installation \'%s\' reached an energy output of only %s yesterday, which is lower than the threshold set of %s.</string>
     <string name="output">SolarEdge output</string>
     <string name="output_trend">Your SolarEdge installation \'%s\' reached an energy output of %s yesterday.</string>
     <string name="manage_api_keys">Manage API Keys</string>

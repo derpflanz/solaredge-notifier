@@ -25,7 +25,7 @@ public class Energy {
     }
     private String getEnergyUnit() { return energyUnit; }
 
-    public static String format(int energy) {
+    public static String format(long energy) {
         String r;
         if (energy > 1000) {
             r = String.format("%.02f kWh", energy / 1000.0);

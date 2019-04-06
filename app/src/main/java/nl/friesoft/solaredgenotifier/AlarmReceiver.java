@@ -192,15 +192,16 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         if (energy_threshold == Long.MAX_VALUE) {
             // when set to MAX_VALUE, we use a slightly nicer message
             message = String.format(context.getString(R.string.energyoutput),
-                    site.getName(), Energy.format(result.getTotalEnergy()));
+                    site.getName(), Energy.format(result.getDailyEnergy(-1)));
             longmessage = String.format(context.getString(R.string.output_trend),
-                    site.getName(), Energy.format(result.getTotalEnergy()));
+                    site.getName(), Energy.format(result.getDailyEnergy(-1)));
             icon = R.drawable.outline_wb_sunny_24;
         } else {
             message = String.format(context.getString(R.string.energyoutput),
-                    site.getName(), Energy.format(result.getTotalEnergy()));
+                    site.getName(), Energy.format(result.getDailyEnergy(-1)));
             longmessage = String.format(context.getString(R.string.outputlow_long),
-                    site.getName(), Energy.format(result.getTotalEnergy()), energy_threshold);
+                    site.getName(), Energy.format(result.getDailyEnergy(-1)),
+                    Energy.format(energy_threshold));
             icon = R.drawable.outline_wb_cloudy_24;
         }
 
