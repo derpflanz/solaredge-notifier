@@ -170,7 +170,7 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
         }
 
         int update_status = Site.STATUS_OK;
-        if (true || result.getDailyEnergy(-1) < energy_threshold) {
+        if (result.getDailyEnergy(-1) < energy_threshold) {
             update_status = status;
             createNotification(site, result, title, energy_threshold, status);
         }
