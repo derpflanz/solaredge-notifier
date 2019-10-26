@@ -13,6 +13,7 @@ The alarm
 5. If there is a response, process it:
     5a. If set to always, notify with output of yesterday
     5b. If set to threshold, check threshold and notify if lower
+    5c. If set to 'lower than average', notify if lower than last week's average
 6. If notification is tapped, open the DiagActivity to show yesterday,
     last week, last month output
 
