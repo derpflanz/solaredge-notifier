@@ -31,9 +31,16 @@ public class PrefFragment extends PreferenceFragment {
     public static final long OPT_MAX_ENERGY = Long.MAX_VALUE;
 
 
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.main_preferences, rootKey);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         final EditTextPreference threshold = (EditTextPreference) findPreference(PREF_THRESHOLD);
         ListPreference options = (ListPreference) findPreference(PREF_OPTIONS);
@@ -52,6 +59,7 @@ public class PrefFragment extends PreferenceFragment {
             long c = siteStorage.count();
             String k = r.getQuantityString(R.plurals.found_n_sites, (int)c);
             sites.setSummary(String.format(k, c));
+            sites.setIcon(null);
         }
 
         Persistent p = new Persistent(getActivity());
@@ -62,6 +70,7 @@ public class PrefFragment extends PreferenceFragment {
         } else {
             String k = r.getQuantityString(R.plurals.configured_n_keys, keys.size());
             editkeys.setSummary(String.format(k, keys.size()));
+            editkeys.setIcon(null);
         }
         lastcheck.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override

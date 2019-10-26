@@ -82,16 +82,11 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
             Check c = new Check(Check.Type.NOKEY);
             persistent.putString(PrefFragment.PREF_LASTCHECK, c.toString());
         } else {
-            // switch true to false to enable the checker
-            if (false) {
-                setAlarm(context, 5000l);
-            } else {
-                for (String apikey : apikeys) {
-                    // We call sites(), because we want all sites connected to the
-                    // API keys. onSiteFound() will be possibly called more than once
-                    SolarEdge sol = new SolarEdge(this);
-                    sol.sites(apikey);
-                }
+            for (String apikey : apikeys) {
+                // We call sites(), because we want all sites connected to the
+                // API keys. onSiteFound() will be possibly called more than once
+                SolarEdge sol = new SolarEdge(this);
+                sol.sites(apikey);
             }
         }
     }
