@@ -29,8 +29,11 @@ public class AlarmReceiver extends BroadcastReceiver implements ISolarEdgeListen
     Persistent persistent;
     Context context;
 
-    private static final long INTERVAL_ERROR = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
-    private static final long INTERVAL_SUCCESS = AlarmManager.INTERVAL_DAY;
+//    private static final long INTERVAL_ERROR = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+//    private static final long INTERVAL_SUCCESS = AlarmManager.INTERVAL_DAY;
+
+    private static final long INTERVAL_ERROR = 10000;
+    private static final long INTERVAL_SUCCESS = 60000;
 
     // set interval to null to cancel the alarm
     public static void setAlarm(Context ctx, Long interval) {

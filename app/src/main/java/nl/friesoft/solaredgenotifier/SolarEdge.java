@@ -94,6 +94,8 @@ public class SolarEdge implements RESTTask.RESTListener {
             }
         } catch (JSONException e) {
             exception = new SolarEdgeException("Failed to parse JSON: "+e.getMessage());
+        } catch (Exception e) {
+            exception = new SolarEdgeException("Unknown error: "+e.getMessage());
         }
 
         if (exception != null) {
